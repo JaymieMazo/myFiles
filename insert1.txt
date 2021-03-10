@@ -1,0 +1,31 @@
+	Private Sub cmdAddSubmit_Click()
+02
+Dim MyConn As ADODB.connection
+03
+         
+04
+        Set MyConn = New ADODB.connection
+05
+        Dim MyRecSet1 As New ADODB.Recordset
+06
+                 
+07
+        MyConn.ConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Documents and Settings\Amber\Desktop\Trackingcustomercalls\Copy of Trackingcustomercalls.mdb"
+08
+        MyConn.Open  
+09
+         
+10
+             
+11
+    Set MyRecSet1 = MyConn.Execute("INSERT INTO ID_ProjectNo VALUES("txtAddProjectNumber.text","txtAddCustomerName.text","txtAddMachine.text")")
+12
+    MyRecSet1.Update
+13
+             
+14
+    MsgBox "The record was added to database", vbCritical, "Succesfull adding"
+15
+    MyConn.Close
+16
+End Su

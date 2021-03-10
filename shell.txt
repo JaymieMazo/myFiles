@@ -1,0 +1,110 @@
+Dim RetVal
+RetVal = Shell("C:\WINDOWS\CALC.EXE", 1)    ' Run Calculator.
+
+' Declare an object variable to hold the object 
+' reference. Dim as Object causes late binding. 
+Dim ExcelSheet As Object
+Set ExcelSheet = CreateObject("Excel.Sheet")
+
+
+' Make Excel visible through the Application object.
+ExcelSheet.Application.Visible = True
+' Place some text in the first cell of the sheet.
+ExcelSheet.Application.Cells(1, 1).Value = "This is column A, row 1"
+' Save the sheet to C:\test.xls directory.
+ExcelSheet.SaveAs "C:\TEST.XLS"
+' Close Excel with the Quit method on the Application object.
+ExcelSheet.Application.Quit
+' Release the object variable.
+Set ExcelSheet = Nothing
+
+
+======
+Dim xlApp As Excel.Application 
+Dim xlBook As Excel.Workbook
+Dim xlSheet As Excel.WorkSheet
+Set xlApp = CreateObject("Excel.Application")
+Set xlBook = xlApp.Workbooks.Add
+Set xlSheet = xlBook.Worksheets(1)
+Call MySub (CreateObject("Excel.Application"))
+
+Dim xlApp As Object
+Set xlApp = CreateObject("Excel.Application", "MyServer")
+Debug.Print xlApp.Version
+
+======Dim xlApp As Object    ' Declare variable to hold the reference.
+    
+Set xlApp = CreateObject("excel.application")
+    ' You may have to set Visible property to True
+    ' if you want to see the application.
+xlApp.Visible = True
+    ' Use xlApp to access Microsoft Excel's 
+    ' other objects.
+======excel file import
+
+With myChart.Application 
+ .FileImport FileName:="C:\mynums.xls", _ 
+ ImportRange:="A2:D5", WorksheetName:="MySheet", _ 
+ OverwriteCells:=False 
+End With
+
+=====insert new rec
+ myChart.Application.DataSheet.Rows(4).Insert
+
+or
+
+Set mySheet = myChart.Application.DataSheet 
+mySheet.Range("A1:C5").Insert Shift:=xlShiftDown
+
+==delete
+
+Set mySheet = myChart.Application.DataSheet 
+mySheet.Range("A1:D10").Delete Shift:=xlShiftToLeft
+
+or 
+
+
+myChart.ChartTitle.Delete
+
+
+==excel fonyt:
+With myChart.Axes(xlValue) 
+ .HasTitle = True 
+ With .AxisTitle 
+ .Caption = "Revenue (millions)" 
+ .Font.Name = "bookman" 
+ .Font.Size = 10 
+ .Characters(10, 8).Font.Italic = True
+ End With 
+End With
+
+==autofit
+myChart.Application.DataSheet.Columns("A:I").AutoFit
+
+
+====excel saveas 
+
+Set NewBook = Workbooks.Add 
+Do 
+ fName = Application.GetSaveAsFilename 
+Loop Until fName <> False 
+NewBook.SaveAs Filename:=fName
+
+==backcolor
+
+With myChart.ChartArea.Fill 
+ .Visible = True 
+ .ForeColor.SchemeColor = 15 
+ .BackColor.SchemeColor = 17 
+ .TwoColorGradient msoGradientHorizontal, 1 
+End With
+
+==cells
+Set mySheet = myChart.Application.DataSheet 
+For rwIndex = 2 to 4 
+ For colIndex = 2 to 10 
+ If mySheet.Cells(rwIndex, colIndex) < .001 Then 
+ mySheet.Cells(rwIndex, colIndex).Value = 0 
+ End If 
+ Next colIndex 
+Next rwIndex

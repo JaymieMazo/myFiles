@@ -1,0 +1,40 @@
+ Private Sub cmdClassToRegister_Click()
+Dim CurrentDate As String
+CurrentDate = Date
+DoCmd.OpenTable ("tblStudentData")
+Dim NewColName As String
+NewColName = ("Attendance" + Str(CurrentDate))
+TableDef.CreateField (NewColName)
+
+End Sub
+
+
+
+Private Sub cmdClassToRegister_Click()
+    Dim CurrentDate As Date
+    CurrentDate = Date
+    Dim NewColName As String
+    Dim db As Database
+    Dim tdf As TableDef
+    Set db = CurrentDb()
+    Set tdf = db.TableDefs("tblStudentData")
+    NewColName = ("Attendance" + Str(CurrentDate))
+    tdf.Fields.Append tdf.CreateField (NewColName, dbText)
+End Sub
+
+
+
+Sub AddDate()
+    Dim rs As Recordset
+    Set rs = CurrentDb.OpenRecordset("yourTblName")
+    rs.AddNew
+    'RegDate must be a column in your table (e.g. string)
+    rs!RegDate = Date
+    rs.Update
+End Sub
+
+
+Dim tbl As TableDef
+Dim db As Database
+Set tbl = db.CreateTableDef([YOURTABLE])
+tbl.Fields.Append tbl.CreateField([NEW FIELD NAME], [TYPE]) 

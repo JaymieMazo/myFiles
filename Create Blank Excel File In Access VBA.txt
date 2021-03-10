@@ -1,0 +1,33 @@
+Public Sub createExcelFile()
+    Dim XL As Excel.Application, WB As Excel.Workbook, WKS As Excel.Worksheet
+    Dim db As DAO.Database, rec As DAO.Recordset, f As DAO.Field
+    Dim i As Integer, j As Integer
+
+    Set XL = New Excel.Application
+    XL.Visible = True
+    Set WB = XL.Workbooks.Add
+    WB.Activate
+    Set WKS = WB.ActiveSheet
+
+    ChDir "C:\Users\MAG\Documents\Reports"
+    ActiveWorkbook.SaveAs FileName:="C:\Users\MAG\Documents\Reports\Report1.xlsx" _
+    , FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+
+    ChDir "C:\Users\MAG\Documents\Reports"
+    ActiveWorkbook.SaveAs FileName:="C:\Users\MAG\Documents\Reports\Report2.xlsx" _
+    , FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+
+    ChDir "C:\Users\MAG\Documents\Reports"
+    ActiveWorkbook.SaveAs FileName:="C:\Users\MAG\Documents\Reports\Report3.xlsx" _
+    , FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+
+     ChDir "C:\Users\MAG\Documents\Reports"
+    ActiveWorkbook.SaveAs FileName:="C:\Users\MAG\Documents\Reports\Report4.xlsx" _
+    , FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+            
+
+    WB.Close True
+    Set WB = Nothing
+    XL.Quit
+    Set XL = Nothing
+End Sub

@@ -1,0 +1,95 @@
+
+Dim q As String
+q = "transfer_id=" & rs(0)
+DoCmd.OpenForm "Transfer Report", acNormal, , q, ,acDialog
+DoCmd.PrintOut
+
+...
+[End If, End Sub, etc.]
+
+
+
+
+Dim varPrinter As Printer
+Dim strRowsource As String
+Dim q As String
+Dim rs As DAO.Recordset
+
+Set rs = db.OpenRecordset("select @@identity")
+Debug.Print rs(0)
+
+If Len(Me.OpenArgs) > 0 Then
+  q = Me.OpenArgs
+  Me.Tag = q
+  For Each varPrinter In Application.Printers
+   strRowsource = strRowsource & "; " & varPrinter.DeviceName
+  Next varPrinter
+  Me!cmbPrinter.RowSource = Mid(strRowsource, 3)
+  ' first check to see that the report is still open
+If (1 = SysCmd(acSysCmdGetObjectState, acReport, q)) Then
+   With Reports(q).Printer
+     Me!cmbPrinter = .DeviceName
+     Me!optLayout = .Orientation
+     End With
+    Me!txtPageTo = Reports(q).Pages
+  End If
+End If
+
+Public Function PrintReport(q As String) As Boolean
+  q = "transfer_id=" & rs(0)
+ ' open report in PREVIEW mode but HIDDEN
+ DoCmd.OpenReport q, acViewPreview, , , acHidden
+ ' open the dialog form to let the user choose printing options
+ DoCmd.OpenForm "dlgPrinter", , , , , acDialog, q
+ With Forms!dlgPrinter
+   If .Tag <> "Cancel" Then
+    Set Reports(q).Printer = Application.Printers((!cmbPrinter))
+    Reports(q).Printer.Orientation = !optLayout
+    Application.Echo False
+    DoCmd.SelectObject acReport, q
+    DoCmd.PrintOut acPages, !txtPageFrom, !txtPageTo
+    PrintReport = True
+   End If
+ End With
+ DoCmd.Close acForm, "dlgPrinter"
+ DoCmd.Close acReport, q
+ Application.Echo True
+End Function
+
+
+
+======Private Sub CmdbtnPrint_Click()
+DoCmd.RunCommand acCmdPrint
+End Sub
+
+
+========
+Dim DefPrn As Printer
+Dim iSelectedPrn As Integer
+
+Set DefPrn = Application.Printer
+
+iSelectedPrn = 3    '<-- User selected value.
+Application.Printer = Application.Printers(iSelectedPrn)
+    
+Application.Printer.ColorMode = acPRCMColor
+Application.Printer.Orientation = acPRORLandscape
+
+DoCmd.OpenReport "rptThankYou", acViewNormal, , "Project_ID = " & Me.Project_ID
+
+'Restore original printer
+Set Application.Printer = DefPrn
+Me.tDefaultPrinter.Requery
+
+
+
+'
+'ElseIf DCount("*", "w_HTI_ItemTags") <> 0 And DCount("*", "w_HTI_ItemTags") <> 1 Then
+'        If MsgBox("Do you want to print " & DCount("*", "w_HTI_ItemTags") & " records? ", vbYesNo, "Confirmation") = vbYes Then
+'        DoCmd.OpenReport "Print_TagNew_FINAL", acViewPreview, , , acWindowNormal
+'        DoCmd.PrintOut , , , , 1
+'        Else
+'            DoCmd.OpenReport "Print_TagNew_FINAL", acViewReport, , , acWindowNormal
+'            DoCmd.RunCommand acCmdPrint
+'            DoCmd.PrintOut , , 1, 1, 1
+'        End If

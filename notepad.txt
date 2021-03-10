@@ -1,0 +1,216 @@
+ Dim oExcel As Object
+   Dim oBook As Object
+   Dim oSheet As Object
+
+   'Start a new workbook in Excel
+   Set oExcel = CreateObject("Excel.Application")
+   Set oBook = oExcel.Workbooks.Add
+
+
+   'Add data to cells of the first worksheet in the new workbook
+   Set oSheet = oBook.Worksheets(1)
+   oSheet.Range("A1").Value = "Last Name"
+   oSheet.Range("B1").Value = "First Name"
+   oSheet.Range("A1:B1").Font.Bold = True
+   oSheet.Range("A2").Value = "Doe"
+   oSheet.Range("B2").Value = "John"
+
+   'Save the Workbook and Quit Excel
+   oBook.SaveAs "C:\Book1.xls"
+   oExcel.Quit
+======================== way 2
+
+Use automation to transfer an array of data to a range on a worksheet
+An array of data can be transferred to a range of multiple cells at once:
+   Dim oExcel As Object
+   Dim oBook As Object
+   Dim oSheet As Object
+
+   'Start a new workbook in Excel
+   Set oExcel = CreateObject("Excel.Application")
+   Set oBook = oExcel.Workbooks.Add
+
+   'Create an array with 3 columns and 100 rows
+   Dim DataArray(1 To 100, 1 To 3) As Variant
+   Dim r As Integer
+   For r = 1 To 100
+      DataArray(r, 1) = "ORD" & Format(r, "0000")
+      DataArray(r, 2) = Rnd() * 1000
+      DataArray(r, 3) = DataArray(r, 2) * 0.7
+   Next
+
+   'Add headers to the worksheet on row 1
+   Set oSheet = oBook.Worksheets(1)
+   oSheet.Range("A1:C1").Value = Array("Order ID", "Amount", "Tax")
+
+   'Transfer the array to the worksheet starting at cell A2
+   oSheet.Range("A2").Resize(100, 3).Value = DataArray
+   
+   'Save the Workbook and Quit Excel
+   oBook.SaveAs "C:\Book1.xls"
+   oExcel.Quit
+If you transfer your data using an array rather than cell by cell, you can realize an enormous performance gain with a large amount of data. Consider this line from the code above that transfers data to 300 cells in the worksheet:
+   oSheet.Range("A2").Resize(100, 3).Value = DataArray
+
+
+
+========way3
+
+  Dim sNWind As String
+   Dim conn As New ADODB.Connection
+   Dim rs As ADODB.Recordset
+   sNWind = _
+      "C:\Program Files\Microsoft Office\Office\Samples\Northwind.mdb"
+   conn.Open "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+      sNWind & ";"
+   conn.CursorLocation = adUseClient
+   Set rs = conn.Execute("Orders", , adCmdTable)
+   
+   'Create a new workbook in Excel
+   Dim oExcel As Object
+   Dim oBook As Object
+   Dim oSheet As Object
+   Set oExcel = CreateObject("Excel.Application")
+   Set oBook = oExcel.Workbooks.Add
+   Set oSheet = oBook.Worksheets(1)
+   
+   'Transfer the data to Excel
+   oSheet.Range("A1").CopyFromRecordset rs
+   
+   'Save the Workbook and Quit Excel
+   oBook.SaveAs "C:\Book1.xls"
+   oExcel.Quit
+   
+   'Close the connection
+   rs.Close
+   conn.Close
+
+
+==========
+
+The following code demonstrates how you could automate Excel 2000, Excel 2002, or Office Excel 2003 to create a new QueryTable in an Excel worksheet using data from the Northwind Sample Database:
+   'Create a new workbook in Excel
+   Dim oExcel As Object
+   Dim oBook As Object
+   Dim oSheet As Object
+   Set oExcel = CreateObject("Excel.Application")
+   Set oBook = oExcel.Workbooks.Add
+   Set oSheet = oBook.Worksheets(1)
+   
+   'Create the QueryTable
+   Dim sNWind As String
+   sNWind = _
+      "C:\Program Files\Microsoft Office\Office\Samples\Northwind.mdb"
+   Dim oQryTable As Object
+   Set oQryTable = oSheet.QueryTables.Add( _
+   "OLEDB;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+      sNWind & ";", oSheet.Range("A1"), "Select * from Orders")
+   oQryTable.RefreshStyle = xlInsertEntireRows
+   oQryTable.Refresh False
+   
+   'Save the Workbook and Quit Excel
+   oBook.SaveAs "C:\Book1.xls"
+   oExcel.Quit
+
+===========
+The Windows Clipboard can also be used as a mechanism for transferring data to a worksheet. To paste data into multiple cells on a worksheet, you can copy a string where columns are delimited by tab characters and rows are delimited by carriage returns. The following code illustrates how Visual Basic can use its Clipboard object to transfer data to Excel:
+   'Copy a string to the clipboard
+   Dim sData As String
+   sData = "FirstName" & vbTab & "LastName" & vbTab & "Birthdate" & vbCr _
+           & "Bill" & vbTab & "Brown" & vbTab & "2/5/85" & vbCr _
+           & "Joe" & vbTab & "Thomas" & vbTab & "1/1/91"
+   Clipboard.Clear
+
+   Clipboard.SetText sData
+   
+   'Create a new workbook in Excel
+   Dim oExcel As Object
+   Dim oBook As Object
+   Set oExcel = CreateObject("Excel.Application")
+   Set oBook = oExcel.Workbooks.Add
+   
+
+   'Paste the data
+   oBook.Worksheets(1).Range("A1").Select
+   oBook.Worksheets(1).Paste
+   
+   'Save the Workbook and Quit Excel
+   oBook.SaveAs "C:\Book1.xls"
+   oExcel.Quit
+
+
+
+======Create a delimited text file that Excel can parse into rows and columns
+
+   'Create a Recordset from all the records in the Orders table
+   Dim sNWind As String
+   Dim conn As New ADODB.Connection
+   Dim rs As ADODB.Recordset
+   Dim sData As String
+   sNWind = _
+      "C:\Program Files\Microsoft Office\Office\Samples\Northwind.mdb"
+   conn.Open "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & _
+      sNWind & ";"
+   conn.CursorLocation = adUseClient
+   Set rs = conn.Execute("Orders", , adCmdTable)
+   
+   'Save the recordset as a tab-delimited file
+   sData = rs.GetString(adClipString, , vbTab, vbCr, vbNullString)
+   Open "C:\Test.txt" For Output As #1
+   Print #1, sData
+   Close #1
+    
+   'Close the connection
+   rs.Close
+   conn.Close
+   
+   'Open the new text file in Excel
+   Shell "C:\Program Files\Microsoft Office\Office\Excel.exe " & _
+      Chr(34) & "C:\Test.txt" & Chr(34), vbMaximizedFocus
+
+
+
+==='Create a new instance of Excel
+   Dim oExcel As Object
+   Dim oBook As Object
+   Dim oSheet As Object
+   Set oExcel = CreateObject("Excel.Application")
+       
+   'Open the text file
+   Set oBook = oExcel.Workbooks.Open("C:\Test.txt")
+   
+   'Save as Excel workbook and Quit Excel
+   oBook.SaveAs "C:\Book1.xls", xlWorkbookNormal
+   oExcel.Quit
+
+
+
+==========Transfer data to a worksheet by using ADO
+Start a new workbook in Excel.
+Add the following headers to cells A1:B1 of Sheet1:
+
+A1: FirstName B1: LastName
+Format cell B1 as right-aligned.
+Select A1:B1.
+On the Insert menu, choose Names and then select Define. Enter the name MyTable and click OK.
+Save the new workbook as C:\Book1.xls and quit Excel.
+To add records to MyTable using ADO, you can use code similar to the following:
+   'Create a new connection object for Book1.xls
+   Dim conn As New ADODB.Connection
+   conn.Open "Provider=Microsoft.Jet.OLEDB.4.0;" & _
+      "Data Source=C:\Book1.xls;Extended Properties=Excel 8.0;"
+   conn.Execute "Insert into MyTable (FirstName, LastName)" & _
+      " values ('Bill', 'Brown')"
+   conn.Execute "Insert into MyTable (FirstName, LastName)" & _
+      " values ('Joe', 'Thomas')"
+
+
+'Create a new connection object for Book1.xls
+   Dim conn As New ADODB.Connection
+   conn.Open "Provider=Microsoft.ACE.OLEDB.12.0;" & _
+      "Data Source=C:\Book1.xlsx;Extended Properties=Excel 12.0;"
+   conn.Execute "Insert into MyTable (FirstName, LastName)" & _
+      " values ('Scott', 'Brown')"
+   conn.Execute "Insert into MyTable (FirstName, LastName)" & _
+      " values ('Jane', 'Dow')"
+   conn.Close
